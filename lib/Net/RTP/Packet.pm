@@ -145,7 +145,7 @@ sub decode {
 	$self->{'ssrc'} = $ssrc;
 	
 	# Process CSRC list
-	for(my $c; $c<$csrc_count; $c++) {
+	for(my $c=0; $c<$csrc_count; $c++) {
 		my $csrc = unpack('N', $bindata );
 		$bindata = substr( $bindata, 4 );
 		
@@ -206,7 +206,7 @@ sub encode {
 	
 	# Append the padding
 	if ($self->{'padding'}) {
-		for(my $p; $p<($self->{'padding'}-1); $p++) {
+		for(my $p=0; $p<($self->{'padding'}-1); $p++) {
 			$bindata .= pack('C', 0);
 		}
 		$bindata .= pack('C', $self->{'padding'});
