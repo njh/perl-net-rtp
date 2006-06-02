@@ -27,7 +27,7 @@ DEPENDENCIES
 ------------
 
 	This module requires the IO::Socket::Multicast perl module,
-	which in-tern requires IO::Interface. 
+	which in-turn requires IO::Interface. 
 		
 
 AUTHOR
