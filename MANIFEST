@@ -6,5 +6,6 @@ lib/Net/RTP/Packet.pm
 README
 MANIFEST
 t/00use.t
+t/10packet.t
 META.yml
 Makefile.PL
