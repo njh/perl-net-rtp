@@ -1,0 +1,47 @@
+Net-RTP version 0.02
+====================
+
+This is a pure perl implementation of Real-time Transport Protocol (RFC3550)
+
+
+INSTALLATION
+------------
+
+	I use Module::Build to build and install the module.
+	To install this module type the following:
+	
+		perl Build.PL
+		./Build
+		./Build test
+		
+	And then as root:
+	
+		./Build install
+
+	Module::Build is available in the debian package:
+
+		libmodule-build-perl
+
+
+DEPENDENCIES
+------------
+
+	This module requires the IO::Socket::Multicast perl module,
+	which in-tern requires IO::Interface. 
+		
+
+AUTHOR
+------
+
+	Nicholas Humfrey, njh@ecs.soton.ac.uk
+
+
+COPYRIGHT AND LICENSE
+---------------------
+
+	Copyright (C) 2006 University of Southampton
+
+	This library is free software; you can redistribute it and/or modify it
+	under the same terms as Perl itself, either Perl version 5.005 or, at
+	your option, any later version of Perl 5 you may have available.
+
