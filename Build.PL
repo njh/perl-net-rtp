@@ -14,6 +14,7 @@ my $build = Module::Build->new
 		'Module::Build' => '0.20'
 	},
 	requires => {
+		'IO::Socket::Multicast' => '1.04',
 		'Test' => '1.00',
 	},
 	create_makefile_pl => 'passthrough',
