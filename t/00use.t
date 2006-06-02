@@ -4,7 +4,7 @@ use Test;
 
 
 # use a BEGIN block so we print our plan before Net::oRTP is loaded
-BEGIN { plan tests => 3 }
+BEGIN { plan tests => 2 }
 
 # load Net::oRTP
 use Net::RTP;
