@@ -83,20 +83,68 @@ __END__
 
 =head1 NAME
 
-Net::RTP - Pure Perl Real-time Transport Protocol (RFC3550)
+Net::RTP - Send and recieve RTP packets (RFC3550)
 
 =head1 SYNOPSIS
 
   use Net::RTP;
 
-  my $rtp = new Net::RTP();
+  my $rtp = new Net::RTP( LocalPort=>5170, LocalAddr=>'233.122.227.171' );
+  $rtp->mcast_add('233.122.227.171');
+  
+  my $packet = $rtp->recv();
+  print "Payload type: ".$packet->payload_type()."\n";
+  
 
 =head1 DESCRIPTION
 
+The Net::RTP module subclasses IO::Socket::Multicast to enable
+you to manipulate multicast groups. The multicast additions are 
+optional, so you may also send and recieve unicast packets.
 
+=over 4
+
+=item $rtp = new Net::RTP( [LocalPort=>$port,...] )
+
+The new() method is the constructor for the Net::RTP class. 
+It takes the same arguments as IO::Socket::Multicast and IO::Socket::INET.
+As with IO::Socket::Multicast the B<Proto> argument defaults
+to "udp", which is more appropriate for RTP.
+
+To create a UDP socket suitable for sending outgoing RTP packets, 
+call new() without no arguments.  To create a UDP socket that can also receive
+incoming RTP packets on a specific port, call new() with
+the B<LocalPort> argument.
+
+If you plan to run the client and server on the same machine, you may
+wish to set the IO::Socket B<ReuseAddr> argument to a true value.
+This allows multiple multicast sockets to bind to the same address.
+
+
+=item my $packet = $rtp->recv( [$size] )
+
+Blocks and waits for an RTP packet to arrive on the UDP socket.
+The read C<$size> defaults to 2048 which is usually big enough to read
+an entire RTP packet (as it is advisable that packets are less than 
+the Ethernet MTU).
+
+Returns a C<Net::RTP::Packet> object or B<undef> if there is a problem.
+
+
+=item $rtp->send( $packet )
+
+Send a L<Net::RTP::Packet> from out of the RTP socket. 
+The B<PeerPort> and B<PeerAddr> should be defined in order to send packets. 
+Returns the number of bytes sent, or the undefined value if there is an error.
 
 
 =head1 SEE ALSO
+
+L<Net::RTP::Packet>
+
+L<IO::Socket::Multicast>
+
+L<IO::Socket::INET>
 
 L<http://www.ietf.org/rfc/rfc3550.txt>
 

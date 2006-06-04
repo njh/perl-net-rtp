@@ -1,7 +1,14 @@
 Net-RTP version 0.02
 ====================
 
-This is a pure perl implementation of Real-time Transport Protocol (RFC3550)
+This is a pure perl implementation of 
+Real-time Transport (RTP) Protocol (RFC3550).
+
+The Net::RTP module is used to send a receive RTP packets.
+
+The Net::RTP::Packet module is used to parse the RTP packet headers. 
+It may be used totally independently of Net::RTP if you want to handle
+sending and receiving packets yourself.
 
 
 INSTALLATION

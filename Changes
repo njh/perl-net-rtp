@@ -1,2 +1,5 @@
 Revision history for Perl extension Net::RTP.
 
+
+0.02  Sun Jun  4 16:16:17 BST 2006
+	First release of pure perl Net::RTP.

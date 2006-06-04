@@ -2,16 +2,17 @@ package Net::RTP::Packet;
 
 ################
 #
-# Net::RTP::Packet: Pure Perl Real-time Transport Protocol (RFC3550)
+# Net::RTP::Packet: Pure Perl RTP Packet object (RFC3550)
 #
 # Nicholas Humfrey
 # njh@cpan.org
 #
 
 use strict;
-use posix;
 use Carp;
 
+use vars qw/$VERSION/;
+$VERSION="0.02";
 
 sub new {
     my $class = shift;
@@ -266,7 +267,7 @@ __END__
 
 =head1 NAME
 
-Net::RTP::Packet - RTP Packet
+Net::RTP::Packet - RTP Packet object (RFC3550)
 
 =head1 SYNOPSIS
 
@@ -288,6 +289,8 @@ Net::RTP::Packet implements RTP packet header encoding and decoding.
 =item $packet = new Net::RTP::Packet( [$binary] )
 
 The new() method is the constructor for the C<Net::RTP::Packet> class.
+The RTP version number is initialized to 2. The sequence number, timestamp 
+and SSRC are all randomized.
 
 The C<$binary> parameter is optional, and is passed to C<decode()> if present.
 
@@ -326,11 +329,23 @@ The sequence number increments by one for each RTP data packet
 sent, and may be used by the receiver to detect packet loss and to
 restore packet sequence.
 
+=item $packet->seq_num_increment( [$amount] )
+
+Increment the packet's sequence number by C<$amount>. If no amount is specified, 
+then the sequence number is incremented by 1. 
+Returns the packet's new sequence number if successful.
+
 =item $packet->timestamp( [$value] )
 
 Get or set the timestamp of the packet.
 The timestamp reflects the sampling instant of the first octet in
 the RTP data packet.
+
+=item $packet->timestamp_increment( [$amount] )
+
+Increment the packet's timestamp by C<$amount>. If no amount is specified, 
+then the timestamp is incremented by 1. 
+Returns the packet's new timestamp if successful.
 
 =item $packet->ssrc( [$value] )
 
@@ -338,7 +353,7 @@ Get or set the 32-bit source identifier of the packet.
 
 =item $packet->csrc( [$value] )
 
-Get or set an ARRAYREF of contributing source indentifers for the packet.
+Get or set an ARRAYREF of contributing source identifiers for the packet.
 
 =item $packet->payload( [$value] )
 
@@ -367,10 +382,12 @@ Decodes binary RTP packet header into the packet object.
 Encode a packet object into a binary RTP packet.
 
 
-
 =head1 SEE ALSO
 
+L<Net::RTP>
+
 L<http://www.ietf.org/rfc/rfc3550.txt>
+
 
 =head1 BUGS
 
@@ -379,9 +396,11 @@ C<bug-net-rtp@rt.cpan.org>, or through the web interface at
 L<http://rt.cpan.org>.  I will be notified, and then you will automatically
 be notified of progress on your bug as I make changes.
 
+
 =head1 AUTHOR
 
 Nicholas Humfrey, njh@cpan.org
+
 
 =head1 COPYRIGHT AND LICENSE
 
