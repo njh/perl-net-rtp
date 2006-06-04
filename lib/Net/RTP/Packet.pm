@@ -19,7 +19,6 @@ srand(time ^ $$ ^ unpack("%L*", `ps axww | gzip`));
 sub new {
     my $class = shift;
 	my ($bindata) = @_;
-	
 
 	# Store parameters
     my $self = {
@@ -28,9 +27,9 @@ sub new {
 		extension => 0,
 		marker => 0,
 		payload_type => 0,
-		seq_num => int(rand(2**16)),
-		timestamp => int(rand(2**32)),
-		ssrc => int(rand(2**32)),
+		seq_num => 0,
+		timestamp => 0,
+		ssrc => 0,
 		csrc => [],
 		payload => '',
 		source_ip => undef,
@@ -38,9 +37,15 @@ sub new {
     };
     bless $self, $class;
 
+
 	# Decode binary packet?
 	if (defined $bindata) {
 		$self->decode( $bindata );
+	} else {
+		# Randomise sequence, timestamp and SSRC
+		$self->{'seq_num'} = int(rand(2**16));
+		$self->{'timestamp'} = int(rand(2**32));
+		$self->{'ssrc'} = int(rand(2**32));
 	}
 	
 	return $self;
