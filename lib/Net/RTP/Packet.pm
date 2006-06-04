@@ -4,8 +4,7 @@ package Net::RTP::Packet;
 #
 # Net::RTP::Packet: Pure Perl RTP Packet object (RFC3550)
 #
-# Nicholas Humfrey
-# njh@cpan.org
+# Nicholas J Humfrey, njh@cpan.org
 #
 
 use strict;
@@ -399,7 +398,7 @@ be notified of progress on your bug as I make changes.
 
 =head1 AUTHOR
 
-Nicholas Humfrey, njh@cpan.org
+Nicholas J Humfrey, njh@cpan.org
 
 
 =head1 COPYRIGHT AND LICENSE
