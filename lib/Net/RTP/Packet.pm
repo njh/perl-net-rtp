@@ -13,12 +13,13 @@ use Carp;
 use vars qw/$VERSION/;
 $VERSION="0.02";
 
+# Generate a very random seed
+srand(time ^ $$ ^ unpack("%L*", `ps axww | gzip`));
+
 sub new {
     my $class = shift;
 	my ($bindata) = @_;
 	
-	# Very random seed
-	srand(time ^ $$ ^ unpack("%L*", `ps axww | gzip`));
 
 	# Store parameters
     my $self = {
