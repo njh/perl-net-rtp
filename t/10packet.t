@@ -5,7 +5,7 @@ use Test;
 use Data::Dumper;
 
 # use a BEGIN block so we print our plan before Net::RTP::Packet is loaded
-BEGIN { plan tests => 20 }
+BEGIN { plan tests => 25 }
 
 # load Net::RTP::Packet
 use Net::RTP::Packet;
@@ -51,4 +51,19 @@ ok( $packet2->payload('perl') );
 # Check that it is the same as the original
 my $binout = $packet2->encode();
 ok( $binout eq $binin );
+
+
+
+# More packet creation tests
+my $packet3 = new Net::RTP::Packet();
+ok( $packet3->seq_num() );    # Should be a random number
+ok( $packet3->timestamp() );  # Should be a random number
+ok( $packet3->ssrc() );       # Should be a random number
+
+# Test incrementing
+my $seq_num = $packet3->seq_num();
+ok( $packet3->seq_num_increment() == $seq_num+1 );
+my $timestamp = $packet3->timestamp();
+ok( $packet3->timestamp_increment(10) == $timestamp+10 );
+
 

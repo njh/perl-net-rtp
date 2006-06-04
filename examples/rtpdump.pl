@@ -1,39 +1,46 @@
 #!/usr/bin/perl
+#
+# Net::RTP example file
+#
+# Display details of RTP packets recieved
+#
 
-use IO::Socket::Multicast;
-use Net::RTP::Packet;
+use Net::RTP;
 use Data::Dumper;
 use strict;
 
-my $PORT = '5170';
-my $GROUP = '233.122.227.171';
+# Make STDOUT unbuffered
+$|=1;
 
+# Check the number of arguments
+if ($#ARGV != 1) {
+	print "usage: rtpdump.pl <address> <port>\n";
+	exit;
+}
 
-my $sock = new IO::Socket::Multicast(
-		Proto=>'udp',
-		LocalPort=>'5170',
-		LocalAddr=>'233.122.227.171',
+# Create RTP socket
+my ($address, $port) = @ARGV;
+my $rtp = new Net::RTP(
+		LocalPort=>$port,
+		LocalAddr=>$address,
 		ReuseAddr=>1
 );
 
-# Add the Radio 1 multicast group
-$sock->mcast_add('233.122.227.171') || die "Couldn't set group: $!\n";
+# Join the multicast group
+$rtp->mcast_add($address) || die "Couldn't join multicast group: $!\n";
 
 
 my $count = 0;
-while (1) {
-	# now receive some multicast data
-	my $data = '';
-	my $addr = $sock->recv($data,2048);
+while (my $packet = $rtp->recv()) {
 
 	# Parse the packet
-	my $packet = new Net::RTP::Packet( $data );
 	print "$count ";
-	print "  Len=".length($packet->payload());
+	print "  Src=".$packet->source_ip().':'.$packet->source_port();
+	print ", Len=".$packet->payload_size();
 	print ", PT=".$packet->payload_type();
 	print ", SSRC=".$packet->ssrc();
 	print ", Seq=".$packet->seq_num();
-	print ", Time=".$packet->time_stamp();
+	print ", Time=".$packet->timestamp();
 	print ", Mark" if ($packet->marker());
 	print "\n";
 

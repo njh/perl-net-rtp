@@ -4,35 +4,73 @@ package Net::RTP;
 #
 # Net::RTP: Pure Perl Real-time Transport Protocol (RFC3550)
 #
-# Nicholas Humfrey
-# njh@ecs.soton.ac.uk
+# Nicholas J Humfrey
+# njh@cpan.org
 #
 
+use IO::Socket::Multicast;
+use Net::RTP::Packet;
+use Socket;
 use strict;
 use Carp;
 
-use vars qw/$VERSION/;
+use vars qw/$VERSION @ISA/;
 
+@ISA = qw/IO::Socket::Multicast/;
 $VERSION="0.02";
 
 sub new {
     my $class = shift;
-
-	# Store parameters
-    my $self = {
-
-    };
-
-
-    bless $self, $class;
-	return $self;
+	return $class->SUPER::new(@_);
 }
 
+sub recv {
+	my $self=shift;
+	my ($size) = @_;
+	
+	# Default read size
+	$size = 2048 unless (defined $size);
+	
+	# Receive a binary packet
+	my $data = undef;
+	my $sockaddr_in = $self->SUPER::recv($data, $size);
+	if (defined $data) {
+	
+		# Parse the packet
+		my $packet = new Net::RTP::Packet( $data );
+		
+		# Store the source address
+		if ($self->sockdomain == &AF_INET 
+		     and $sockaddr_in ne ''
+		     and defined $packet)
+		{
+			my ($port,$addr) = unpack_sockaddr_in($sockaddr_in);
+			$packet->{'source_ip'} = inet_ntoa($addr);
+			$packet->{'source_port'} = $port;
+		}
+		
+		return $packet;
+	}
+	
+	return undef;
+}
+
+sub send {
+	my $self=shift;
+	my ($packet) = @_;
+	
+	if (!defined $packet or ref($packet) ne 'Net::RTP::Packet') {
+		croak "Net::RTP->send() takes a Net::RTP::Packet as its only argument";
+	}
+	
+	# Build packet and send it
+	my $data = $packet->encode();
+	return $self->SUPER::send($data);
+}
 
 sub DESTROY {
     my $self=shift;
-    
-
+	return $self->SUPER::DESTROY(@_);
 }
 
 
@@ -71,7 +109,7 @@ be notified of progress on your bug as I make changes.
 
 =head1 AUTHOR
 
-Nicholas Humfrey, njh@ecs.soton.ac.uk
+Nicholas Humfrey, njh@cpan.org
 
 =head1 COPYRIGHT AND LICENSE
 

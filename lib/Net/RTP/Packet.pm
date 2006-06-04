@@ -5,16 +5,20 @@ package Net::RTP::Packet;
 # Net::RTP::Packet: Pure Perl Real-time Transport Protocol (RFC3550)
 #
 # Nicholas Humfrey
-# njh@ecs.soton.ac.uk
+# njh@cpan.org
 #
 
 use strict;
+use posix;
 use Carp;
 
 
 sub new {
     my $class = shift;
 	my ($bindata) = @_;
+	
+	# Very random seed
+	srand(time ^ $$ ^ unpack("%L*", `ps axww | gzip`));
 
 	# Store parameters
     my $self = {
@@ -23,11 +27,13 @@ sub new {
 		extension => 0,
 		marker => 0,
 		payload_type => 0,
-		seq_num => 0,
-		timestamp => 0,
-		ssrc => 0,
+		seq_num => int(rand(2**16)),
+		timestamp => int(rand(2**32)),
+		ssrc => int(rand(2**32)),
 		csrc => [],
 		payload => '',
+		source_ip => undef,
+		source_port => undef,
     };
     bless $self, $class;
 
@@ -80,10 +86,30 @@ sub seq_num {
 	return $self->{'seq_num'};
 }
 
+sub seq_num_increment {
+	my $self = shift;
+
+	my ($value) = @_;
+	$value = 1 unless (defined $value);
+	$self->{'seq_num'} += $value;
+
+	return $self->{'seq_num'};
+}
+	
 sub timestamp {
 	my $self = shift;
 	my ($timestamp) = @_;
 	$self->{'timestamp'} = $timestamp if (defined $timestamp);
+	return $self->{'timestamp'};
+}
+
+sub timestamp_increment {
+	my $self = shift;
+
+	my ($value) = @_;
+	$value = 1 unless (defined $value);
+	$self->{'timestamp'} += $value;
+
 	return $self->{'timestamp'};
 }
 
@@ -118,6 +144,17 @@ sub payload_size {
 	my $self = shift;
 	return length($self->{'payload'});
 }
+
+sub source_ip {
+	my $self = shift;
+	return $self->{'source_ip'};
+}
+
+sub source_port {
+	my $self = shift;
+	return $self->{'source_port'};
+}
+
 
 sub decode {
 	my $self = shift;
@@ -167,6 +204,11 @@ sub decode {
 	# Whats left is the payload
 	my $len = length( $bindata ) - $self->{'padding'};
 	$self->{'payload'} = substr($bindata,0,$len);
+	
+	# Undefine the source IP and port
+	# (it is unknown and set elsewhere)
+	$self->{'source_ip'} = undef;
+	$self->{'source_port'} = undef;
 	
 	# Success
 	return 1;
@@ -306,6 +348,16 @@ Get or set the payload data for the packet.
 
 Return the length (in bytes) of the packet's payload.
 
+=item $packet->source_ip()
+
+Return the source IP address of the packet (as an ASCII string).
+If the source IP is not known, the value is undefined.
+
+=item $packet->source_port()
+
+Return the source port of the packet (as an ASCII string).
+If the source port is not known, the value is undefined.
+
 =item $packet->decode( $binary )
 
 Decodes binary RTP packet header into the packet object.
@@ -329,7 +381,7 @@ be notified of progress on your bug as I make changes.
 
 =head1 AUTHOR
 
-Nicholas Humfrey, njh@ecs.soton.ac.uk
+Nicholas Humfrey, njh@cpan.org
 
 =head1 COPYRIGHT AND LICENSE
 
