@@ -9,7 +9,7 @@ use strict;
 my $build = Module::Build->new
 (
 	module_name => 'Net::RTP',
-	license => 'gpl',
+	license => 'perl',
 	build_requires => {
 		'Module::Build' => '0.20'
 	},
