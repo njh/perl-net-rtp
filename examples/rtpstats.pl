@@ -38,10 +38,12 @@ $rtp->mcast_add($address) || die "Couldn't join multicast group: $!\n";
 # Shared variables used for collecting statistics
 our $packets : shared;
 our $bytes : shared;
+our $loss : shared;
 reset_stats();
 
 threads->new( \&display_stats );
 
+my $seq=0;
 while (1) {
 
 	my $packet = $rtp->recv();
@@ -50,6 +52,13 @@ while (1) {
 	# Update statistics
 	$bytes += $packet->payload_size();
 	$packets++;
+	
+	# 
+	if ($seq != 0 and ($packet->seq_num() != $seq)) {
+	
+		$loss++;
+	}
+	$seq = $packet->seq_num() + 1;
 	
 	# Parse the packet
 	#print "$count ";
@@ -69,7 +78,8 @@ sub display_stats {
 	while (1) {
 		sleep(1);
 
-		printf("packets=%d, bytes=%d, bitrate=%d kbps\n", $packets, $bytes, ($bytes*8)/1000);
+		my $sec = (localtime())[0];
+		printf("%3d  packets=%3d, bytes=%d, loss=%d, bitrate=%d kbps\n", $sec, $packets, $bytes, $loss, ($bytes*8)/1000);
 	
 		reset_stats();
 	}
@@ -78,8 +88,7 @@ sub display_stats {
 
 
 sub reset_stats {
-	
 	$packets=0;
 	$bytes=0;
-
+	$loss=0;
 }
