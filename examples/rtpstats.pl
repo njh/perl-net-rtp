@@ -35,11 +35,8 @@ my $rtp = new Net::RTP(
 $rtp->mcast_add($address) || die "Couldn't join multicast group: $!\n";
 
 
-# Shared variables used for collecting statistics
-our $packets : shared;
-our $bytes : shared;
-our $loss : shared;
-reset_stats();
+# Shared variable used for collecting statistics
+our $stats = &share({});
 
 threads->new( \&display_stats );
 
@@ -49,16 +46,34 @@ while (1) {
 	my $packet = $rtp->recv();
 	die "Failed to recieve packet: $!" unless (defined $packet);
 	
-	# Update statistics
-	$bytes += $packet->payload_size();
-	$packets++;
-	
-	# 
-	if ($seq != 0 and ($packet->seq_num() != $seq)) {
-	
-		$loss++;
+	my $ssrc = $packet->ssrc();
+	unless (exists $stats->{$ssrc}) {
+		$stats->{$ssrc} = &share({});
+		$stats->{$ssrc}->{'seq_num'}=$packet->seq_num();
+		reset_stats( $ssrc );
 	}
-	$seq = $packet->seq_num() + 1;
+	
+	# Update statistics
+	$stats->{$ssrc}->{'bytes'} += $packet->payload_size();
+	$stats->{$ssrc}->{'packets'} += 1;
+	
+	# Lost or late packet?
+	if ($stats->{$ssrc}->{'seq_num'} != $packet->seq_num()) {
+		if ($stats->{$ssrc}->{'seq_num'}-1 == $packet->seq_num()) { 
+			$stats->{$ssrc}->{'dup'}++;
+		} elsif ($stats->{$ssrc}->{'seq_num'} > $packet->seq_num()) { 
+			$stats->{$ssrc}->{'late'}++;
+			$stats->{$ssrc}->{'lost'}--;
+		} else {
+			$stats->{$ssrc}->{'lost'}++;
+		}
+	}
+	
+	# Calculate next number in sequence
+	$stats->{$ssrc}->{'seq_num'} = $packet->seq_num()+1;
+	if ($stats->{$ssrc}->{'seq_num'} > 65535) {
+		$stats->{$ssrc}->{'seq_num'}=0;
+	}
 	
 	# Parse the packet
 	#print "$count ";
@@ -78,17 +93,23 @@ sub display_stats {
 	while (1) {
 		sleep(1);
 
-		my $sec = (localtime())[0];
-		printf("%3d  packets=%3d, bytes=%d, loss=%d, bitrate=%d kbps\n", $sec, $packets, $bytes, $loss, ($bytes*8)/1000);
+		#my $sec = (localtime())[0];
+		#printf("%3d  packets=%3d, bytes=%d, lost=%d, bitrate=%d kbps\n", $sec, $packets, $bytes, $lost, ($bytes*8)/1000);
 	
-		reset_stats();
+		print Dumper( $stats );
+		#reset_stats();
 	}
 	
 }
 
 
 sub reset_stats {
-	$packets=0;
-	$bytes=0;
-	$loss=0;
+	my ($ssrc) = @_;
+	
+	$stats->{$ssrc}->{'packets'}=0;
+	$stats->{$ssrc}->{'bytes'}=0;
+	$stats->{$ssrc}->{'lost'}=0;
+	$stats->{$ssrc}->{'late'}=0;
+	$stats->{$ssrc}->{'dup'}=0;
+	#$lost=0;
 }
