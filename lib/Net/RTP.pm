@@ -17,7 +17,7 @@ use Carp;
 use vars qw/$VERSION @ISA/;
 
 @ISA = qw/IO::Socket::Multicast/;
-$VERSION="0.02";
+$VERSION="0.03";
 
 sub new {
     my $class = shift;
@@ -34,7 +34,7 @@ sub recv {
 	# Receive a binary packet
 	my $data = undef;
 	my $sockaddr_in = $self->SUPER::recv($data, $size);
-	if (defined $data) {
+	if (defined $data and $data ne '') {
 	
 		# Parse the packet
 		my $packet = new Net::RTP::Packet( $data );

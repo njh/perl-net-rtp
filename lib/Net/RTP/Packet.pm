@@ -11,7 +11,7 @@ use strict;
 use Carp;
 
 use vars qw/$VERSION/;
-$VERSION="0.02";
+$VERSION="0.03";
 
 # Generate a very random seed
 srand(time ^ $$ ^ unpack("%L*", `ps axww | gzip`));
@@ -161,6 +161,11 @@ sub source_port {
 	return $self->{'source_port'};
 }
 
+sub size {
+	my $self = shift;
+	# Not very efficient, but sure to work
+	return length($self->encode());
+}
 
 sub decode {
 	my $self = shift;
@@ -377,6 +382,10 @@ If the source IP is not known, the value is undefined.
 
 Return the source port of the packet (as an ASCII string).
 If the source port is not known, the value is undefined.
+
+=item $packet->size()
+
+Return the length (in bytes) of the binary RTP packet.
 
 =item $packet->decode( $binary )
 
