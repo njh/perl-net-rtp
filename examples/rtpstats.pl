@@ -50,21 +50,31 @@ while (1) {
 	unless (exists $stats->{$ssrc}) {
 		$stats->{$ssrc} = &share({});
 		$stats->{$ssrc}->{'seq_num'}=$packet->seq_num();
+		$stats->{$ssrc}->{'src_ip'}=$packet->source_ip();
 		reset_stats( $ssrc );
+	}
+	
+	# Check SRC IP
+	if ($stats->{$ssrc}->{'src_ip'} ne $packet->source_ip()) {
+		warn "Ignoring packet with different Source IP address";
+		next;
 	}
 	
 	# Update statistics
 	$stats->{$ssrc}->{'bytes'} += $packet->payload_size();
 	$stats->{$ssrc}->{'packets'} += 1;
 	
-	# Lost or late packet?
+	# Lost or OutOfOrder packet?
 	if ($stats->{$ssrc}->{'seq_num'} != $packet->seq_num()) {
-		if ($stats->{$ssrc}->{'seq_num'}-1 == $packet->seq_num()) { 
+		if ($stats->{$ssrc}->{'seq_num'}-1 == $packet->seq_num()) {
+			# Duplicated
 			$stats->{$ssrc}->{'dup'}++;
-		} elsif ($stats->{$ssrc}->{'seq_num'} > $packet->seq_num()) { 
-			$stats->{$ssrc}->{'late'}++;
+		} elsif ($stats->{$ssrc}->{'seq_num'} > $packet->seq_num()) {
+			# Out Of Order
+			$stats->{$ssrc}->{'ooo'}++;
 			$stats->{$ssrc}->{'lost'}--;
 		} else {
+			# Lost
 			$stats->{$ssrc}->{'lost'}++;
 		}
 	}
@@ -109,7 +119,7 @@ sub reset_stats {
 	$stats->{$ssrc}->{'packets'}=0;
 	$stats->{$ssrc}->{'bytes'}=0;
 	$stats->{$ssrc}->{'lost'}=0;
-	$stats->{$ssrc}->{'late'}=0;
+	$stats->{$ssrc}->{'ooo'}=0;
 	$stats->{$ssrc}->{'dup'}=0;
 	#$lost=0;
 }
