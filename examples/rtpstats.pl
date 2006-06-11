@@ -14,7 +14,7 @@ use Time::HiRes qw/ sleep time /;
 use Data::Dumper;
 
 
-my $IP_HEADER_SIZE = 40; 	# 20 bytes of IP+8 bytes of UDP
+my $IP_HEADER_SIZE = 28; 	# 20 bytes of IPv4 header and 8 bytes of UDP header
 
 
 # Make STDOUT unbuffered
@@ -49,16 +49,16 @@ while (1) {
 	die "Failed to recieve packet: $!" unless (defined $packet);
 	
 	# No stats for that SSRC yet?
-	my $ssrc = $packet->ssrc();
-	unless (exists $all_stats->{$ssrc}) {
-		$all_stats->{$ssrc} = init_stats( $packet )
+	my $src = $packet->source_ip();
+	unless (exists $all_stats->{$src}) {
+		$all_stats->{$src} = init_stats( $packet )
 	}
-	my $stats = $all_stats->{$ssrc};
+	my $stats = $all_stats->{$src};
 	
-	# Check Source IP
-	if ($stats->{'src_ip'} ne $packet->source_ip()) {
-		warn "Ignoring packet with different Source IP address";
-		next;
+	# Verfify Source Identifier
+	if ($stats->{'ssrc'} ne $packet->ssrc()) {
+		warn "SSRC of packets from '$src' has changed.\n";
+		$stats->{'ssrc'} = $packet->ssrc();
 	}
 	
 	# Update statistics
@@ -112,7 +112,7 @@ sub display_stats {
 			$sec, $stats->{'packets'}, $stats->{'lost'}, $stats->{'late'}, $stats->{'bytes'},
 			$stats->{'total_packets'}, $stats->{'total_lost'}, $stats->{'total_late'},
 			$stats->{'total_bytes'}/1024, 
-			(($stats->{'total_bytes'}*8)/1000)/(time()-$start), 
+			(($stats->{'total_bytes'}*8)/1000)/(time()-$stats->{'first_packet'}), 
 			$stats->{'src_ip'}, );
 			
 			reset_stats( $stats );
@@ -132,10 +132,10 @@ sub init_stats {
 	my ($packet) = @_;
 	my $stats = &share( {} );
 
-	my $ssrc = $packet->ssrc();
-	$stats->{'ssrc'}=$ssrc;
+	$stats->{'ssrc'}=$packet->ssrc();
 	$stats->{'seq_num'}=$packet->seq_num();
 	$stats->{'src_ip'}=$packet->source_ip();
+	$stats->{'first_packet'}=time();
 	
 	$stats->{'total_packets'}=0;
 	$stats->{'total_bytes'}=0;
