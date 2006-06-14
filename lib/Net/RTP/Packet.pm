@@ -32,6 +32,7 @@ sub new {
 		ssrc => 0,
 		csrc => [],
 		payload => '',
+		size => undef,
 		source_ip => undef,
 		source_port => undef,
     };
@@ -163,14 +164,23 @@ sub source_port {
 
 sub size {
 	my $self = shift;
-	# Not very efficient, but sure to work
-	return length($self->encode());
+	
+	# Encode the packet if the size isn't known
+	unless (defined $self->{'size'}) {
+		# Not very efficient, but sure to work
+		$self->encode();
+	}
+	
+	return $self->{'size'};
 }
 
 sub decode {
 	my $self = shift;
 	my ($bindata) = @_;
 	
+	# Store the size of the packet we are decoding
+	$self->{'size'} = length( $bindata );
+
 	# Decode the binary header (network endian)
 	my ($vpxcc, $mpt, $seq_num, $timestamp, $ssrc) = unpack( 'CCnNN', $bindata );
 	$bindata = substr( $bindata, 12 );
@@ -191,6 +201,7 @@ sub decode {
 	$self->{'seq_num'} = $seq_num;
 	$self->{'timestamp'} = $timestamp;
 	$self->{'ssrc'} = $ssrc;
+
 	
 	# Process CSRC list
 	for(my $c=0; $c<$csrc_count; $c++) {
@@ -264,6 +275,9 @@ sub encode {
 		}
 		$bindata .= pack('C', $self->{'padding'});
 	}
+	
+	# Store the size of the encoded packet
+	$self->{'size'} = length( $bindata );
 	
 	return $bindata;
 }
@@ -386,6 +400,8 @@ If the source port is not known, the value is undefined.
 =item $packet->size()
 
 Return the length (in bytes) of the binary RTP packet.
+
+Note: The size of the packet is only calculated during encode() and decode().
 
 =item $packet->decode( $binary )
 

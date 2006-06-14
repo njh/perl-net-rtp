@@ -5,7 +5,7 @@ use Test;
 use Data::Dumper;
 
 # use a BEGIN block so we print our plan before Net::RTP::Packet is loaded
-BEGIN { plan tests => 25 }
+BEGIN { plan tests => 27 }
 
 # load Net::RTP::Packet
 use Net::RTP::Packet;
@@ -35,6 +35,7 @@ ok( $packet->timestamp() == 763035288 );
 ok( $packet->ssrc() == 1857812520 );
 ok( $packet->payload() eq 'perl' );
 ok( $packet->payload_size() == 4 );
+ok( $packet->size() == 20 );
 
 
 # Now create an identical packet
@@ -47,10 +48,10 @@ ok( $packet2->timestamp(763035288) );
 ok( $packet2->ssrc(1857812520) );
 ok( $packet2->payload('perl') );
 
-
 # Check that it is the same as the original
 my $binout = $packet2->encode();
 ok( $binout eq $binin );
+ok( $packet2->size() == 20 );
 
 
 
