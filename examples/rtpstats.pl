@@ -49,16 +49,16 @@ while (1) {
 	die "Failed to recieve packet: $!" unless (defined $packet);
 	
 	# No stats for that SSRC yet?
-	my $src = $packet->source_ip();
-	unless (exists $all_stats->{$src}) {
-		$all_stats->{$src} = init_stats( $packet )
+	my $ssrc = $packet->ssrc();
+	unless (exists $all_stats->{$ssrc}) {
+		$all_stats->{$ssrc} = init_stats( $packet )
 	}
-	my $stats = $all_stats->{$src};
+	my $stats = $all_stats->{$ssrc};
 	
-	# Verfify Source Identifier
-	if ($stats->{'ssrc'} ne $packet->ssrc()) {
-		warn "SSRC of packets from '$src' has changed.\n";
-		$stats->{'ssrc'} = $packet->ssrc();
+	# Verfify Source Address
+	if ($stats->{'source_ip'} ne $packet->source_ip()) {
+		warn "Source IP of SSRC of  '$ssrc' has changed.\n";
+		$stats->{'source_ip'} = $packet->source_ip();
 	}
 	
 	# Update statistics
@@ -99,7 +99,7 @@ sub display_stats {
 		# Wait until time for next check
 		sleep($next-time()) if ($next-time()>0);
 
-		my $sec = (localtime())[0];
+		my ($sec, $min, $hour) = localtime();
 		print_key() if ($sec==0);
 		
 		foreach my $stats ( values %$all_stats ) {
@@ -108,12 +108,13 @@ sub display_stats {
 			$stats->{'total_lost'}+=$stats->{'lost'};
 			$stats->{'total_late'}+=$stats->{'late'};
 			
-			printf("%2d  %3d  %3d  %3d  %6d | %5d  %4d  %4d %6d  %4d  %s\n",
-			$sec, $stats->{'packets'}, $stats->{'lost'}, $stats->{'late'}, $stats->{'bytes'},
+			printf("%2.2d:%2.2d:%2.2d  %3d  %3d  %3d  %6d | %5d  %4d  %4d %6d  %4d  %s\n",
+			$hour, $min, $sec, 
+			$stats->{'packets'}, $stats->{'lost'}, $stats->{'late'}, $stats->{'bytes'},
 			$stats->{'total_packets'}, $stats->{'total_lost'}, $stats->{'total_late'},
 			$stats->{'total_bytes'}/1024, 
 			(($stats->{'total_bytes'}*8)/1000)/(time()-$stats->{'first_packet'}), 
-			$stats->{'src_ip'}, );
+			$stats->{'source_ip'}, );
 			
 			reset_stats( $stats );
 		}
@@ -125,7 +126,7 @@ sub display_stats {
 }
 
 sub print_key {
-	print " T Pkts Lost Late   Bytes |  Pkts  Lost  Late     kB  kbps  Sender\n";
+	print "Time     Pkts Lost Late   Bytes |  Pkts  Lost  Late     kB  kbps  Sender\n";
 }
 
 sub init_stats {
@@ -134,7 +135,7 @@ sub init_stats {
 
 	$stats->{'ssrc'}=$packet->ssrc();
 	$stats->{'seq_num'}=$packet->seq_num();
-	$stats->{'src_ip'}=$packet->source_ip();
+	$stats->{'source_ip'}=$packet->source_ip();
 	$stats->{'first_packet'}=time();
 	
 	$stats->{'total_packets'}=0;
