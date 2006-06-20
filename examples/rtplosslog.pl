@@ -86,7 +86,7 @@ while (1) {
 			$stats->{'lost'}--;
 		} else {
 			# Lost
-			$stats->{'lost'}++;
+			$stats->{'lost'}+=($packet->seq_num()-$stats->{'seq_num'});
 		}
 	}
 	
