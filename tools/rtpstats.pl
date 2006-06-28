@@ -157,5 +157,38 @@ sub reset_stats {
 	$stats->{'lost'}=0;		# Packets lost in past second
 	$stats->{'late'}=0;		# Out of order
 	$stats->{'dup'}=0;		# Duplicated packets in past second
-
 }
+
+
+
+
+__END__
+
+=pod
+
+=head1 NAME
+
+rtpstats.pl - Displays packet loss statistics for an RTP session
+
+=head1 SYNOPSIS
+
+  rtpstats.pl <address> [<port>]
+
+=head1 DESCRIPTION
+
+  Foo bar
+
+=head1 AUTHOR
+
+Nicholas Humfrey, njh@cpan.org
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2006 University of Southampton
+
+This script is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.005 or,
+at your option, any later version of Perl 5 you may have available.
+
+=cut
+

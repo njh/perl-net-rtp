@@ -9,17 +9,15 @@ use Net::RTP;
 use Data::Dumper;
 use strict;
 
-# Make STDOUT unbuffered
-$|=1;
 
-# Check the number of arguments
-if ($#ARGV != 1) {
-	print "usage: rtpdump.pl <address> <port>\n";
-	exit;
-}
+my $DEFAULT_PORT = 5004;	# Default RTP port
+
 
 # Create RTP socket
 my ($address, $port) = @ARGV;
+usage() unless (defined $address);
+$port = $DEFAULT_PORT unless (defined $port);
+
 my $rtp = new Net::RTP(
 		LocalPort=>$port,
 		LocalAddr=>$address,
@@ -47,3 +45,39 @@ while (my $packet = $rtp->recv()) {
 	$count++;
 }
 
+
+sub usage {
+	print "usage: rtpdump.pl <address> <port>\n";
+	exit -1;
+}
+
+
+__END__
+
+=pod
+
+=head1 NAME
+
+rtpdump.pl - Parse and display incoming RTP packet headers
+
+=head1 SYNOPSIS
+
+  rtpdump.pl <address> [<port>]
+
+=head1 DESCRIPTION
+
+  Foo bar
+
+=head1 AUTHOR
+
+Nicholas Humfrey, njh@cpan.org
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2006 University of Southampton
+
+This script is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.005 or,
+at your option, any later version of Perl 5 you may have available.
+
+=cut

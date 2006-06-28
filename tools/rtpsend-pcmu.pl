@@ -73,3 +73,38 @@ sub usage {
 	print "usage: rtpsend-pcmu.pl <filename> <dest_addr> [<dest_port>] [<ttl>]\n";
 	exit -1;
 }
+
+
+__END__
+
+=pod
+
+=head1 NAME
+
+rtpsend-pcmu.pl - Send an audio file as an u-law RTP session
+
+=head1 SYNOPSIS
+
+  rtpsend-pcmu.pl <filename> <dest_addr> [<dest_port>] [<ttl>]
+
+=head1 DESCRIPTION
+
+  Foo bar
+
+=head1 BUGS
+
+Doesn't keep packet sending timing very well - goes out of sync very quickly.
+
+=head1 AUTHOR
+
+Nicholas Humfrey, njh@cpan.org
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2006 University of Southampton
+
+This script is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.005 or,
+at your option, any later version of Perl 5 you may have available.
+
+=cut

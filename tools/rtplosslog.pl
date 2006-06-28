@@ -53,7 +53,7 @@ while (1) {
 	# No chosen source IP yet?
 	my $src = $packet->source_ip();
 	unless (defined $src_ip) {
-		warn "Using $src as source IP address.\n"; 
+		print STDERR "# Using $src as source IP address.\n"; 
 		$src_ip = $src;
 	}
 	next if ($src ne $src_ip);
@@ -67,7 +67,7 @@ while (1) {
 	
 	# Verfify Source Identifier
 	if ($stats->{'ssrc'} ne $packet->ssrc()) {
-		warn "SSRC of packets from '$src' has changed.\n";
+		warn "# SSRC of packets from '$src' has changed.\n";
 		$stats->{'ssrc'} = $packet->ssrc();
 	}
 	
@@ -102,9 +102,9 @@ sub display_stats {
 
 	# Wait until the first second of a minute
 	my $start = start_of_next_minute();
-	warn "Waiting until start of next minute.\n";
+	print STDERR "# Waiting until start of next minute.\n";
 	sleep( $start-time() );
-	warn "Go!\n";
+	print STDERR "# Timestamp\tPackets\tBytes\tLost\tLate\n";
 
 	my $next = $start+60;
 	
@@ -140,3 +140,37 @@ sub reset_stats {
 	$stats->{'dup'}=0;		# Duplicated packets in past second
 
 }
+
+
+
+
+__END__
+
+=pod
+
+=head1 NAME
+
+rtplosslog.pl - Display packet loss for a RTP session each minute
+
+=head1 SYNOPSIS
+
+  rtplosslog.pl <address> <port> [<src_ip>]
+
+=head1 DESCRIPTION
+
+  Foo bar
+
+=head1 AUTHOR
+
+Nicholas Humfrey, njh@cpan.org
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2006 University of Southampton
+
+This script is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.008 or,
+at your option, any later version of Perl 5 you may have available.
+
+=cut
+

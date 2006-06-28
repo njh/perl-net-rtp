@@ -13,6 +13,12 @@ my $build = Module::Build->new
 	build_requires => {
 		'Module::Build' => '0.20'
 	},
+	script_files => [
+		'tools/rtpdump.pl',
+		'tools/rtpstats.pl',
+		'tools/rtpsend-pcmu.pl',
+		'tools/rtplosslog.pl',
+	],
 	requires => {
 		'IO::Socket::Multicast' => '1.04',
 		'Test' => '1.00',
