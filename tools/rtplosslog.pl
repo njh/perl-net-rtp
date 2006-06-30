@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# Log RTP packet loss
+# Log packet loss for a RTP session every minute
 #
 
 use 5.008;             # 5.8 required for stable threading
@@ -152,7 +152,7 @@ __END__
 
 =head1 NAME
 
-rtplosslog.pl - Display packet loss for a RTP session each minute
+rtplosslog.pl - Log packet loss for a RTP session every minute
 
 =head1 SYNOPSIS
 

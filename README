@@ -42,7 +42,7 @@ INCLUDED TOOLS
 
 	rtpstats.pl - Displays packet statistics for an RTP session
 	rtpsend-pcmu.pl - Send an audio file as an u-law RTP session
-	rtplosslog.pl - Display packet loss for a RTP session each minute
+	rtplosslog.pl - Log packet loss for a RTP session every minute
 	rtpdump.pl - Parse and display incoming RTP packet headers
 
 
