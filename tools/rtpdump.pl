@@ -22,7 +22,7 @@ my $rtp = new Net::RTP(
 		LocalPort=>$port,
 		LocalAddr=>$address,
 		ReuseAddr=>1
-);
+) || die "Failed to create RTP socket: $!";
 
 # Join the multicast group
 $rtp->mcast_add($address) || die "Couldn't join multicast group: $!\n";
@@ -32,14 +32,14 @@ my $count = 0;
 while (my $packet = $rtp->recv()) {
 
 	# Parse the packet
-	print "$count ";
-	print "  Src=".$packet->source_ip().':'.$packet->source_port();
-	print ", Len=".$packet->payload_size();
+	print "COUNT=".$count;
+	print ", SRC=".$packet->source_ip().':'.$packet->source_port();
+	print ", LEN=".$packet->payload_size();
 	print ", PT=".$packet->payload_type();
 	print ", SSRC=".$packet->ssrc();
-	print ", Seq=".$packet->seq_num();
-	print ", Time=".$packet->timestamp();
-	print ", Mark" if ($packet->marker());
+	print ", SEQ=".$packet->seq_num();
+	print ", TIME=".$packet->timestamp();
+	print ", MARK" if ($packet->marker());
 	print "\n";
 
 	$count++;
@@ -47,7 +47,7 @@ while (my $packet = $rtp->recv()) {
 
 
 sub usage {
-	print "usage: rtpdump.pl <address> <port>\n";
+	print "usage: rtpdump.pl <address> [<port>]\n";
 	exit -1;
 }
 
@@ -62,15 +62,68 @@ rtpdump.pl - Parse and display incoming RTP packet headers
 
 =head1 SYNOPSIS
 
-  rtpdump.pl <address> [<port>]
+rtpdump.pl <address> [<port>]
 
 =head1 DESCRIPTION
 
-  Foo bar
+rtpdump.pl displays the RTP header of packets sent to a multicast group.
+If no port is specified, then port 5004 is assumed.
+
+For each packet recieved, the following fields are displayed:
+
+=over
+
+=item
+
+B<COUNT> - the number of packets recieved.
+
+=item
+
+B<SRC> - the source IP address and port.
+
+=item
+
+B<LEN> - the length of the payload (in bytes).
+
+=item
+
+B<PT> - the payload type number.
+
+=item
+
+B<SSRC> - the source indentifier unique to this session.
+
+=item
+
+B<SEQ> - the packet's contiguous sequence number.
+
+=item
+
+B<TIME> - the packet's timestamp (based on payload clock rate).
+
+=item
+
+B<MARK> - displayed if the packet's marker bit is set.
+
+=back
+
+=head1 SEE ALSO
+
+L<Net::RTP>
+
+L<Net::RTP::Packet>
+
+L<http://www.iana.org/assignments/rtp-parameters>
+
+
+=head1 BUGS
+
+Unicast addresses aren't currently detected and fail when trying to join 
+multicast group.
 
 =head1 AUTHOR
 
-Nicholas Humfrey, njh@cpan.org
+Nicholas J Humfrey, njh@cpan.org
 
 =head1 COPYRIGHT AND LICENSE
 

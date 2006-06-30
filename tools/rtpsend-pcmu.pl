@@ -36,7 +36,7 @@ print "Payload size: $PAYLOAD_SIZE bytes\n";
 my $rtp = new Net::RTP(
 		PeerPort=>$port,
 		PeerAddr=>$address,
-);
+) || die "Failed to create RTP socket: $!";
 
 # Set the TTL
 $rtp->mcast_ttl( $ttl );
@@ -81,23 +81,42 @@ __END__
 
 =head1 NAME
 
-rtpsend-pcmu.pl - Send an audio file as an u-law RTP session
+rtpsend-pcmu.pl - Send an audio file an RTP session as u-law
 
 =head1 SYNOPSIS
 
-  rtpsend-pcmu.pl <filename> <dest_addr> [<dest_port>] [<ttl>]
+rtpsend-pcmu.pl <filename> <dest_addr> [<dest_port>] [<ttl>]
 
 =head1 DESCRIPTION
 
-  Foo bar
+rtpsend-pcmu.pl sends audio files to an RTP session using PCM u-law (G.711)
+payload encoding (RTP payload type 0). 
+If no port is specified, then port 5004 is assumed.
+If no TTL is specified, then a TTL of 2 is assumed.
+
+Each packet sent contains 160 samples of audio, and as payload type 0 has a
+fixed sample rate of 8000Hz, each packet has a duration of 20 miliseconds.
+
+rtpsend-pcmu.pl uses the B<'sox'> command as helper to transcode and resample 
+the audio file to u-law, which means that many audio file formats 
+are automatically supported (AIFF, WAVE, SUN .au, GSM, ...).
+
+
+=head1 SEE ALSO
+
+L<Net::RTP>
+
+L<Net::RTP::Packet>
+
+L<http://sox.sourceforge.net/>
 
 =head1 BUGS
 
-Doesn't keep packet sending timing very well - goes out of sync very quickly.
+Doesn't keep packet sending timing very well - it goes out of sync very quickly.
 
 =head1 AUTHOR
 
-Nicholas Humfrey, njh@cpan.org
+Nicholas J Humfrey, njh@cpan.org
 
 =head1 COPYRIGHT AND LICENSE
 
@@ -108,3 +127,4 @@ it under the same terms as Perl itself, either Perl version 5.005 or,
 at your option, any later version of Perl 5 you may have available.
 
 =cut
+

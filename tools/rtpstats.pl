@@ -15,24 +15,22 @@ use Data::Dumper;
 
 
 my $IP_HEADER_SIZE = 28; 	# 20 bytes of IPv4 header and 8 bytes of UDP header
+my $DEFAULT_PORT = 5004;	# Default RTP port
 
 
 # Make STDOUT unbuffered
 $|=1;
 
-# Check the number of arguments
-if ($#ARGV != 1) {
-	print "usage: rtpstats.pl <address> <port>\n";
-	exit;
-}
 
 # Create RTP socket
 my ($address, $port) = @ARGV;
+usage() unless (defined $address);
+$port = $DEFAULT_PORT unless (defined $port);
 my $rtp = new Net::RTP(
 		LocalPort=>$port,
 		LocalAddr=>$address,
 		ReuseAddr=>1
-);
+) || die "Failed to create RTP socket: $!";
 
 # Join the multicast group
 $rtp->mcast_add($address) || die "Couldn't join multicast group: $!\n";
@@ -159,7 +157,10 @@ sub reset_stats {
 	$stats->{'dup'}=0;		# Duplicated packets in past second
 }
 
-
+sub usage {
+	print "usage: rtpstats.pl <address> [<port>]\n";
+	exit -1;
+}
 
 
 __END__
@@ -172,22 +173,92 @@ rtpstats.pl - Displays packet loss statistics for an RTP session
 
 =head1 SYNOPSIS
 
-  rtpstats.pl <address> [<port>]
+rtpstats.pl <address> [<port>]
 
 =head1 DESCRIPTION
 
-  Foo bar
+rtpstats.pl displays packet statistics for an RTP session. It is a 
+clone of rtpqual by Matthew B Mathis with a few changes in design. 
+If no port is specified, then port 5004 is assumed.
+
+rtpstats.pl uses seperate threads for 
+recieving packets and displaying statistics, so version 5.8 or greater 
+of perl is recommended for stable threading.
+
+For every second that passes, a row is printed for each transmitter
+to the multicast group. The first (left-hand) second displays statistics for 
+the current second, and the second (right-hand) second displays the 
+cumulative totals for transmitter.
+
+=over
+
+=item 1
+
+The time in hours:minutes:seconds on the local host
+
+=item 2
+
+The number of packets recieved from the transmitter in the past second.
+
+=item 3
+
+The number of packets lost in the past second.
+
+=item 4
+
+The number of packets that arrived late (out-of-order) in the past second.
+
+=item 5
+
+The number of bytes (including estimated IP header size) in the past second.
+
+=item 6
+
+The total number of packets recieved from the transmitter.
+
+=item 7
+
+The total number of packets lost.
+
+=item 8
+
+The total number of packets late (out-of-order).
+
+=item 9
+
+The total number of kilobytes recieved from the transmitter.
+
+=item 10
+
+The average kilobits per second since the first packet was recieved.
+
+=item 11
+
+The IP address of the transmitter.
+
+=back
+
+=head1 SEE ALSO
+
+L<Net::RTP>
+
+L<Net::RTP::Packet>
+
+=head1 BUGS
+
+Unicast addresses aren't currently detected and fail when trying to join 
+multicast group.
 
 =head1 AUTHOR
 
-Nicholas Humfrey, njh@cpan.org
+Nicholas J Humfrey, njh@cpan.org
 
 =head1 COPYRIGHT AND LICENSE
 
 Copyright (C) 2006 University of Southampton
 
 This script is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.005 or,
+it under the same terms as Perl itself, either Perl version 5.008 or,
 at your option, any later version of Perl 5 you may have available.
 
 =cut
