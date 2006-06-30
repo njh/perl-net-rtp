@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# Display RTP statistics
+# Displays packet statistics for an RTP session
 #
 
 use 5.008;             # 5.8 required for stable threading
@@ -169,7 +169,7 @@ __END__
 
 =head1 NAME
 
-rtpstats.pl - Displays packet loss statistics for an RTP session
+rtpstats.pl - Displays packet statistics for an RTP session
 
 =head1 SYNOPSIS
 
