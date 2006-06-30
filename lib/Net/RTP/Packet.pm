@@ -308,7 +308,7 @@ Net::RTP::Packet - RTP Packet object (RFC3550)
 
 Net::RTP::Packet implements RTP packet header encoding and decoding.
 
-=over 4
+=over
 
 =item $packet = new Net::RTP::Packet( [$binary] )
 
@@ -411,6 +411,7 @@ Decodes binary RTP packet header into the packet object.
 
 Encode a packet object into a binary RTP packet.
 
+=back
 
 =head1 SEE ALSO
 

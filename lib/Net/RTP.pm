@@ -102,7 +102,7 @@ The C<Net::RTP> module subclasses L<IO::Socket::Multicast> to enable
 you to manipulate multicast groups. The multicast additions are 
 optional, so you may also send and recieve unicast packets.
 
-=over 4
+=over
 
 =item $rtp = new Net::RTP( [LocalPort=>$port,...] )
 
@@ -136,6 +136,8 @@ Returns a C<Net::RTP::Packet> object or B<undef> if there is a problem.
 Send a L<Net::RTP::Packet> from out of the RTP socket. 
 The B<PeerPort> and B<PeerAddr> should be defined in order to send packets. 
 Returns the number of bytes sent, or the undefined value if there is an error.
+
+=back
 
 
 =head1 SEE ALSO
