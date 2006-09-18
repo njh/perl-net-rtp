@@ -8,7 +8,7 @@ package Net::RTP;
 # njh@cpan.org
 #
 
-use IO::Socket::Multicast;
+use IO::Socket::Multicast6;
 use Net::RTP::Packet;
 use Socket;
 use strict;
@@ -16,8 +16,8 @@ use Carp;
 
 use vars qw/$VERSION @ISA/;
 
-@ISA = qw/IO::Socket::Multicast/;
-$VERSION="0.03";
+@ISA = qw/IO::Socket::Multicast6/;
+$VERSION="0.04";
 
 sub new {
     my $class = shift;
@@ -98,7 +98,7 @@ Net::RTP - Send and recieve RTP packets (RFC3550)
 
 =head1 DESCRIPTION
 
-The C<Net::RTP> module subclasses L<IO::Socket::Multicast> to enable
+The C<Net::RTP> module subclasses L<IO::Socket::Multicast6> to enable
 you to manipulate multicast groups. The multicast additions are 
 optional, so you may also send and recieve unicast packets.
 
@@ -107,8 +107,8 @@ optional, so you may also send and recieve unicast packets.
 =item $rtp = new Net::RTP( [LocalPort=>$port,...] )
 
 The new() method is the constructor for the Net::RTP class. 
-It takes the same arguments as L<IO::Socket::Multicast> and L<IO::Socket::INET>.
-As with L<IO::Socket::Multicast> the B<Proto> argument defaults
+It takes the same arguments as L<IO::Socket::Multicast6> and L<IO::Socket::INET>.
+As with L<IO::Socket::Multicast6> the B<Proto> argument defaults
 to "udp", which is more appropriate for RTP.
 
 To create a UDP socket suitable for sending outgoing RTP packets, 
@@ -144,9 +144,9 @@ Returns the number of bytes sent, or the undefined value if there is an error.
 
 L<Net::RTP::Packet>
 
-L<IO::Socket::Multicast>
+L<IO::Socket::Multicast6>
 
-L<IO::Socket::INET>
+L<IO::Socket::INET6>
 
 L<http://www.ietf.org/rfc/rfc3550.txt>
 
