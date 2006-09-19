@@ -14,10 +14,42 @@ use Socket;
 use strict;
 use Carp;
 
-use vars qw/$VERSION @ISA/;
 
-@ISA = qw/IO::Socket::Multicast6/;
+
+# Use whatever Superclass we can find first
+BEGIN {
+	my @superclasses = (
+		'IO::Socket::Multicast6 0.02',
+		'IO::Socket::Multicast 1.05',
+		'IO::Socket::INET6 2.51',
+		'IO::Socket::INET 1.20',
+	);
+	
+	our $SUPER_CLASS = undef;
+	foreach my $super (@superclasses) {
+		eval "use $super";
+		unless ($@) {
+			($SUPER_CLASS) = ($super =~ /^([\w:]+)/);
+			last;
+		} else {
+			print "Failed to load $super\n";
+		}
+	}
+	
+	unless (defined $SUPER_CLASS) {
+		die "Failed to load any of super classes.";
+	}
+}
+
+
+
+use vars qw/$VERSION @ISA $SUPER_CLASS/;
+@ISA = ($SUPER_CLASS);
 $VERSION="0.04";
+
+print "Super class is: $SUPER_CLASS\n";
+
+
 
 sub new {
     my $class = shift;
@@ -40,13 +72,15 @@ sub recv {
 		my $packet = new Net::RTP::Packet( $data );
 		
 		# Store the source address
-		if ($self->sockdomain == &AF_INET 
-		     and $sockaddr_in ne ''
-		     and defined $packet)
+		if ($sockaddr_in ne '' and defined $packet)
 		{
-			my ($port,$addr) = unpack_sockaddr_in($sockaddr_in);
-			$packet->{'source_ip'} = inet_ntoa($addr);
-			$packet->{'source_port'} = $port;
+			if ($self->sockdomain() == &AF_INET) {
+				my ($port,$addr) = unpack_sockaddr_in($sockaddr_in);
+				$packet->{'source_ip'} = inet_ntoa($addr);
+				$packet->{'source_port'} = $port;
+			} else {
+				warn "Unsupported socket family: ".$self->sockdomain()."\n";
+			}
 		}
 		
 		return $packet;
@@ -54,6 +88,7 @@ sub recv {
 	
 	return undef;
 }
+
 
 sub send {
 	my $self=shift;
@@ -67,6 +102,7 @@ sub send {
 	my $data = $packet->encode();
 	return $self->SUPER::send($data);
 }
+
 
 sub DESTROY {
     my $self=shift;
