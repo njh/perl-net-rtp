@@ -18,7 +18,7 @@ ok( $packet->payload_type(96) );
 ok( $packet->payload('Hello World!') );
 
 # Create a RTP socket with multicast desination
-my $rtp = new Net::RTP( PeerAddr=>'239.255.234.1:4100' );
+my $rtp = new Net::RTP( PeerAddr=>'239.255.234.1:4100', Domain=>AF_INET );
 ok( defined $rtp );
 
 # Set multicast TTL to 1

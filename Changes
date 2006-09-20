@@ -1,5 +1,10 @@
 Revision history for Perl extension Net::RTP.
 
+0.04  Wed Sep 20 16:12:14 BST 2006
+	Removed hard requirement for multicast module.
+	Added support for IPv6.
+	Will use IO::Socket::Multicast or IO::Socket::Multicast6 only when available.
+
 0.03  Wed Jun 28 19:31:52 BST 2006
 	Bug fix for creating packet objects.
 	Examples are now documented and have become tools

@@ -21,15 +21,18 @@ my $build = Module::Build->new
 	],
 	requires => {
 		'Test::More' => 0,
+		'IO::Socket::INET' => '1.20',
 	},
 	
 	create_makefile_pl => 'passthrough',
 	
+	
+	# Optional modules
 	recommends => {
 		'IO::Socket::Multicast6' => '0.02',
-		'IO::Socket::Multicast' => '1.05',
+		'IO::Socket::Multicast' => '1.00',
 		'IO::Socket::INET6' => '2.51',
-		'IO::Socket::INET' => '1.20',
+		'Socket6' => '0.19',
 	},
 );
 

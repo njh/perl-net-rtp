@@ -17,10 +17,11 @@ use Carp;
 
 
 # Use whatever Superclass we can find first
+# we would prefer to have a multicast socket...
 BEGIN {
 	my @superclasses = (
 		'IO::Socket::Multicast6 0.02',
-		'IO::Socket::Multicast 1.05',
+		'IO::Socket::Multicast 1.00',
 		'IO::Socket::INET6 2.51',
 		'IO::Socket::INET 1.20',
 	);
@@ -31,30 +32,86 @@ BEGIN {
 		unless ($@) {
 			($SUPER_CLASS) = ($super =~ /^([\w:]+)/);
 			last;
-		} else {
-			print "Failed to load $super\n";
 		}
 	}
 	
 	unless (defined $SUPER_CLASS) {
 		die "Failed to load any of super classes.";
 	}
+	
+	
+	# Check to see if Socket6 is available
+	our $HAVE_SOCKET6 = 0;
+	eval "use Socket6 qw/ AF_INET6 unpack_sockaddr_in6 inet_ntop /;";
+	$HAVE_SOCKET6=1 unless ($@);
 }
 
 
 
-use vars qw/$VERSION @ISA $SUPER_CLASS/;
+use vars qw/$VERSION @ISA $SUPER_CLASS $HAVE_SOCKET6/;
 @ISA = ($SUPER_CLASS);
 $VERSION="0.04";
 
-print "Super class is: $SUPER_CLASS\n";
 
 
 
 sub new {
     my $class = shift;
+	unshift @_,(Proto => 'udp') unless @_;
 	return $class->SUPER::new(@_);
 }
+
+
+sub configure {
+	my($self,$arg) = @_;
+	
+	# Default to UDP instead of TCP
+	$arg->{Proto} ||= 'udp';
+	$arg->{ReuseAddr} ||= 1;
+	my $result = $self->SUPER::configure($arg);
+
+	
+	if (defined $result) {	
+		# Join group if it a multicast IP address
+		my $group = $self->sockhost();
+		if (_is_multicast_ip($group)) {
+			if ($self->superclass() =~ /Multicast/) {
+				print "Joining group: $group\n";
+				$self->mcast_add( $group ) || croak "Failed to join multicast group";
+			} else {
+				croak "Error: can't receive multicast without either ".
+					  "IO::Socket::Multicast or IO::Socket::Multicast6 installed.";
+			}
+		} 
+	}
+	
+	return $result;
+}
+
+
+sub _is_multicast_ip {
+	my ($group) = @_;
+	
+	return 0 unless (defined $group);
+	
+	# IPv4 multicast address ?
+	if ($group =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) {
+		return 1 if ($1 >= 224 and $1 <= 239);
+		
+	# IPv6 multicast address ?
+	} elsif ($group =~ /^ff[0-9a-f]{2}\:/i) {
+		return 1;
+	}
+
+	# Not an multicast IP
+	return 0;
+}
+
+
+sub superclass {
+	return $SUPER_CLASS;
+}
+
 
 sub recv {
 	my $self=shift;
@@ -78,8 +135,15 @@ sub recv {
 				my ($port,$addr) = unpack_sockaddr_in($sockaddr_in);
 				$packet->{'source_ip'} = inet_ntoa($addr);
 				$packet->{'source_port'} = $port;
+				
+			} elsif ($HAVE_SOCKET6 and $self->sockdomain() == &AF_INET6) {
+				eval {
+					my ($port,$addr) = unpack_sockaddr_in6($sockaddr_in);
+					$packet->{'source_ip'} = inet_ntop(AF_INET6, $addr);
+					$packet->{'source_port'} = $port;
+				};
 			} else {
-				warn "Unsupported socket family: ".$self->sockdomain()."\n";
+				warn "Unsupported socket family: ".$self->sockdomain();
 			}
 		}
 		
@@ -119,14 +183,13 @@ __END__
 
 =head1 NAME
 
-Net::RTP - Send and recieve RTP packets (RFC3550)
+Net::RTP - Send and receive RTP packets (RFC3550)
 
 =head1 SYNOPSIS
 
   use Net::RTP;
 
   my $rtp = new Net::RTP( LocalPort=>5170, LocalAddr=>'233.122.227.171' );
-  $rtp->mcast_add('233.122.227.171');
   
   my $packet = $rtp->recv();
   print "Payload type: ".$packet->payload_type()."\n";
@@ -140,21 +203,22 @@ optional, so you may also send and recieve unicast packets.
 
 =over
 
-=item $rtp = new Net::RTP( [LocalPort=>$port,...] )
+=item $rtp = new Net::RTP( [LocalAdrr=>$addr, LocalPort=>$port,...] )
 
 The new() method is the constructor for the Net::RTP class. 
-It takes the same arguments as L<IO::Socket::Multicast6> and L<IO::Socket::INET>.
-As with L<IO::Socket::Multicast6> the B<Proto> argument defaults
-to "udp", which is more appropriate for RTP.
+It takes the same arguments as L<IO::Socket::INET>, however 
+the B<Proto> argument defaults to "udp", which is more appropriate for RTP.
 
-To create a UDP socket suitable for sending outgoing RTP packets, 
-call new() without no arguments.  To create a UDP socket that can also receive
-incoming RTP packets on a specific port, call new() with
-the B<LocalPort> argument.
+The Net::RTP super-class used will depend on what is available on your system
+it will try and use one of the following (in order of preference) :
 
-If you plan to run the client and server on the same machine, you may
-wish to set the L<IO::Socket> B<ReuseAddr> argument to a true value.
-This allows multiple multicast sockets to bind to the same address.
+	IO::Socket::Multicast6 (IPv4 and IPv6 unicast and multicast)
+	IO::Socket::Multicast (IPv4 unicast and multicast)
+	IO::Socket::INET6 (IPv4 and IPv6 unicast)
+	IO::Socket::INET (IPv4 unicast)
+
+If LocalAddr looks like a multicast address, then Net::RTP will automatically 
+try and join that multicast group for you.
 
 
 =item my $packet = $rtp->recv( [$size] )
@@ -176,6 +240,13 @@ Returns the number of bytes sent, or the undefined value if there is an error.
 =back
 
 
+=item $rtp->superclass()
+
+Returns the name of the super-class that Net::RTP chose to use.
+
+=back
+
+
 =head1 SEE ALSO
 
 L<Net::RTP::Packet>
@@ -183,6 +254,10 @@ L<Net::RTP::Packet>
 L<IO::Socket::Multicast6>
 
 L<IO::Socket::INET6>
+
+L<IO::Socket::Multicast>
+
+L<IO::Socket::INET>
 
 L<http://www.ietf.org/rfc/rfc3550.txt>
 

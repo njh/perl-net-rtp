@@ -11,7 +11,7 @@ use strict;
 use Carp;
 
 use vars qw/$VERSION/;
-$VERSION="0.03";
+$VERSION="0.04";
 
 # Generate a very random seed
 srand(time ^ $$ ^ unpack("%L*", `ps axww | gzip`));

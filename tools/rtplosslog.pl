@@ -29,12 +29,8 @@ usage() unless (defined $address);
 $port = $DEFAULT_PORT unless (defined $port);
 my $rtp = new Net::RTP(
 		LocalPort=>$port,
-		LocalAddr=>$address,
-		ReuseAddr=>1
+		LocalAddr=>$address
 ) || die "Failed to create RTP socket: $!";
-
-# Join the multicast group
-$rtp->mcast_add($address) || die "Couldn't join multicast group: $!\n";
 
 
 # Shared variable used for collecting statistics

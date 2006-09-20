@@ -1,5 +1,5 @@
-Net-RTP version 0.02
-====================
+Net-RTP
+=======
 
 This is a pure perl implementation of 
 Real-time Transport (RTP) Protocol (RFC3550).
@@ -35,6 +35,13 @@ DEPENDENCIES
 
 	This module requires the IO::Socket::Multicast perl module,
 	which in-turn requires IO::Interface. 
+	
+	You will also need one of the following super-class modules:
+		
+		IO::Socket::Multicast6 (IPv4 and IPv6 unicast and multicast)
+		IO::Socket::Multicast (IPv4 unicast and multicast)
+		IO::Socket::INET6 (IPv4 and IPv6 unicast)
+		IO::Socket::INET (IPv4 unicast)
 		
 
 INCLUDED TOOLS

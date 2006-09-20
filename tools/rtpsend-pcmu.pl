@@ -39,7 +39,9 @@ my $rtp = new Net::RTP(
 ) || die "Failed to create RTP socket: $!";
 
 # Set the TTL
-$rtp->mcast_ttl( $ttl );
+if ($rtp->superclass() =~ /Multicast/) {
+	$rtp->mcast_ttl( $ttl );
+}
 
 # Create RTP packet
 my $packet = new Net::RTP::Packet();
