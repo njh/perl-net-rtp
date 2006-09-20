@@ -237,9 +237,6 @@ Send a L<Net::RTP::Packet> from out of the RTP socket.
 The B<PeerPort> and B<PeerAddr> should be defined in order to send packets. 
 Returns the number of bytes sent, or the undefined value if there is an error.
 
-=back
-
-
 =item $rtp->superclass()
 
 Returns the name of the super-class that Net::RTP chose to use.
