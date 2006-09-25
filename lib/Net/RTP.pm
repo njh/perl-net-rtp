@@ -76,7 +76,7 @@ sub configure {
 		my $group = $self->sockhost();
 		if (_is_multicast_ip($group)) {
 			if ($self->superclass() =~ /Multicast/) {
-				print "Joining group: $group\n";
+				#print "Joining group: $group\n";
 				$self->mcast_add( $group ) || croak "Failed to join multicast group";
 			} else {
 				croak "Error: can't receive multicast without either ".
