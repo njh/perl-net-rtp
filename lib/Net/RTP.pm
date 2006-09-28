@@ -8,7 +8,6 @@ package Net::RTP;
 # njh@cpan.org
 #
 
-use IO::Socket::Multicast6;
 use Net::RTP::Packet;
 use Socket;
 use strict;
