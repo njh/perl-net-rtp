@@ -11,10 +11,14 @@ use strict;
 use Carp;
 
 use vars qw/$VERSION/;
-$VERSION="0.04";
+$VERSION="0.05";
 
-# Generate a very random seed
-srand(time ^ $$ ^ unpack("%L*", `ps axww | gzip`));
+
+# Seed a random number for old versions of perl
+if ($] < 5.004) {
+	srand(time ^ ($$ + ($$ << 15)));
+}
+
 
 sub new {
     my $class = shift;

@@ -1,5 +1,8 @@
 Revision history for Perl extension Net::RTP.
 
+0.07  Thu Mar  8 21:14:12 GMT 2007
+	Changed non-portable random number seeding (and disabled srand() for new versions of perl)
+
 0.06  Thu Mar  8 20:07:42 GMT 2007
 	Fixed send test script - shouldn't attempt any multicast, unless we know it is supported
 	Added Test::Pod test script

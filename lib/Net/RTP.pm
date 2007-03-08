@@ -49,7 +49,7 @@ BEGIN {
 
 use vars qw/$VERSION @ISA $SUPER_CLASS $HAVE_SOCKET6/;
 @ISA = ($SUPER_CLASS);
-$VERSION="0.06";
+$VERSION="0.07";
 
 
 
