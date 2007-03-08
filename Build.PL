@@ -33,6 +33,7 @@ my $build = Module::Build->new
 		'IO::Socket::Multicast' => '1.00',
 		'IO::Socket::INET6' => '2.51',
 		'Socket6' => '0.19',
+		'Test::Pod' => '1.00',
 	},
 );
 
