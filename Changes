@@ -1,5 +1,8 @@
 Revision history for Perl extension Net::RTP.
 
+0.08  Fri Mar  9 14:35:20 GMT 2007
+	Fix for systems without Socket6
+
 0.07  Thu Mar  8 21:14:12 GMT 2007
 	Changed non-portable random number seeding (and disabled srand() for new versions of perl)
 

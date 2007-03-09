@@ -49,7 +49,7 @@ BEGIN {
 
 use vars qw/$VERSION @ISA $SUPER_CLASS $HAVE_SOCKET6/;
 @ISA = ($SUPER_CLASS);
-$VERSION="0.07";
+$VERSION="0.08";
 
 
 
@@ -135,14 +135,19 @@ sub recv {
 				$packet->{'source_ip'} = inet_ntoa($addr);
 				$packet->{'source_port'} = $port;
 				
-			} elsif ($HAVE_SOCKET6 and $self->sockdomain() == &AF_INET6) {
+			} elsif ($HAVE_SOCKET6) {
 				eval {
-					my ($port,$addr) = unpack_sockaddr_in6($sockaddr_in);
-					$packet->{'source_ip'} = inet_ntop(AF_INET6, $addr);
-					$packet->{'source_port'} = $port;
+					if ($self->sockdomain() == &AF_INET6) {
+						my ($port,$addr) = unpack_sockaddr_in6($sockaddr_in);
+						$packet->{'source_ip'} = inet_ntop(AF_INET6, $addr);
+						$packet->{'source_port'} = $port;
+					}
 				};
-			} else {
-				warn "Unsupported socket family: ".$self->sockdomain();
+			}
+			
+			# Failed to decode socket address ?
+			unless (defined $packet->{'source_ip'}) {
+				warn "Failed to get socket address for family: ".$self->sockdomain();
 			}
 		}
 		
