@@ -139,7 +139,7 @@ sub recv {
 				eval {
 					if ($self->sockdomain() == &AF_INET6) {
 						my ($port,$addr) = unpack_sockaddr_in6($sockaddr_in);
-						$packet->{'source_ip'} = inet_ntop(AF_INET6, $addr);
+						$packet->{'source_ip'} = inet_ntop(&AF_INET6, $addr);
 						$packet->{'source_port'} = $port;
 					}
 				};
