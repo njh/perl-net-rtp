@@ -74,6 +74,12 @@ rtptimer.pl - Displays arrival times of incoming RTP packet headers
 
 rtptimer.pl <address> [<port>]
 
+Displays arrival times for incoming RTP packets.
+The first column is the time in milliseconds since the tool started,
+followed by the time in milliseconds since the last packet.
+This is then followed by the source IP, packet length in bytes, 
+payload type, sequence number and the packet timestamp. The timestamp 
+is then followed by the difference between it and the previous packet.
 
 =head1 SEE ALSO
 
