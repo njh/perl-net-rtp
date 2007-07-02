@@ -7,7 +7,7 @@
 
 use Net::RTP;
 use Data::Dumper;
-use Time::HiRes;
+use Time::HiRes qw/time/;
 use strict;
 
 
@@ -25,19 +25,34 @@ my $rtp = new Net::RTP(
 ) || die "Failed to create RTP socket: $!";
 
 
-my $count = 0;
+my $start = time();
+my $last = time();
+my $ts_last = 0;
 while (my $packet = $rtp->recv()) {
-
-	# Parse the packet
-	printf("COUNT=%d".$count);
-	printf(", SRC=[%s]", $packet->source_ip());
-	printf(", LEN=%d", $packet->payload_size());
-	printf(", PT=%d", $packet->payload_type());
-	printf(", SEQ=%d", $packet->seq_num());
-	printf(", TIME=%d", $packet->timestamp());
+	my $this = time();
+	
+	# Calculate the difference from the last packet
+	my $diff = sprintf("%2.2f", ($this-$last)*1000);
+	$diff = "+$diff" if ($diff>0);
+	
+	# Calculate the difference from the last packet
+	my $ts_diff = $packet->timestamp()-$ts_last;
+	$ts_diff = "+$ts_diff" if ($ts_diff>0);
+	
+	# Display the packet
+	printf("%2.2f", ($this-$start)*1000);
+	printf(" (%s)", $diff);
+	printf("  SRC=%s", $packet->source_ip());
+	printf(", LEN=%u", $packet->payload_size());
+	printf(", PT=%u", $packet->payload_type());
+	printf(", SEQ=%u", $packet->seq_num());
+	printf(", TS=%u", $packet->timestamp());
+	printf(" (%s)", $ts_diff);
 	printf("\n");
 
-	$count++;
+	# Store time of last packet that arrived
+	$last = $this;
+	$ts_last = $packet->timestamp();
 }
 
 
