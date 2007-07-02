@@ -15,9 +15,10 @@ my $build = Module::Build->new
 	},
 	script_files => [
 		'tools/rtpdump.pl',
-		'tools/rtpstats.pl',
-		'tools/rtpsend-pcmu.pl',
 		'tools/rtplosslog.pl',
+		'tools/rtpsend-pcmu.pl',
+		'tools/rtpstats.pl',
+		'tools/rtptimer.pl',
 	],
 	requires => {
 		'Test::More' => 0,
