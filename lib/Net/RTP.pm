@@ -9,6 +9,7 @@ package Net::RTP;
 #
 
 use Net::RTP::Packet;
+use Net::RTCP::Packet;
 use Socket;
 use strict;
 use Carp;
@@ -125,7 +126,16 @@ sub recv {
 	if (defined $data and $data ne '') {
 	
 		# Parse the packet
-		my $packet = new Net::RTP::Packet( $data );
+		my $packet = undef;
+		
+		# Are we an RTP or a RTCP socket?
+		if (ref($self) eq 'Net::RTP') {
+			$packet = new Net::RTP::Packet( $data );
+		} elsif (ref($self) eq 'Net::RTCP') {
+			$packet = new Net::RTCP::Packet( $data );
+		} else {
+			die "I am of an unknown type: ".ref($self);
+		}
 		
 		# Store the source address
 		if ($sockaddr_in ne '' and defined $packet)
@@ -162,8 +172,16 @@ sub send {
 	my $self=shift;
 	my ($packet) = @_;
 	
-	if (!defined $packet or ref($packet) ne 'Net::RTP::Packet') {
-		croak "Net::RTP->send() takes a Net::RTP::Packet as its only argument";
+	if (ref($self) eq 'Net::RTP') {
+		if (!defined $packet or ref($packet) ne 'Net::RTP::Packet') {
+			croak "Net::RTP->send() takes a Net::RTP::Packet as its only argument";
+		}
+	} elsif (ref($self) eq 'Net::RTCP') {
+		if (!defined $packet or ref($packet) ne 'Net::RTCP::Packet') {
+			croak "Net::RTCP->send() takes a Net::RTCP::Packet as its only argument";
+		}
+	} else {
+		die "I am of an unknown type: ".ref($self);
 	}
 	
 	# Build packet and send it
